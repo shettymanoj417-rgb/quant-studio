@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Quantization Studio</title>
+	<link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+	<main class="shell">
+		<header class="topbar">
+			<div>
+				<p class="eyebrow">MODEL WORKBENCH</p>
+				<h1>Quantization Studio</h1>
+			</div>
+			<span class="status"><i></i> Local workspace</span>
+		</header>
+
+		<section class="intro dashboard-intro">
+			<div>
+				<p class="eyebrow">YOUR MODEL WORKSPACE</p>
+				<h2>Quantization dashboard</h2>
+				<p class="lede">Choose a workspace section below. Your settings stay in place as you move around.</p>
+			</div>
+			<div class="metric" id="workflowMetric" data-state="ready"><strong id="statusValue">Ready</strong><span>WORKFLOW STATUS</span></div>
+		</section>
+
+		<section class="dashboard">
+			<nav class="dashboard-nav" role="tablist" aria-label="Dashboard sections">
+				<button class="dashboard-tab is-active" id="tab-source" type="button" role="tab"
+					aria-selected="true" aria-controls="page-source" data-dashboard-target="source">
+					<span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4.3 7.6 7.7 4.5 7.7-4.5M12 12.1V21" /></svg></span>
+					<span><strong>Model</strong><small>Choose a source</small></span>
+				</button>
+				<button class="dashboard-tab" id="tab-settings" type="button" role="tab"
+					aria-selected="false" aria-controls="page-settings" data-dashboard-target="settings">
+					<span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h9m4 0h3M4 17h3m4 0h9M13 4v6M7 14v6" /></svg></span>
+					<span><strong>Quantization</strong><small>Precision & dataset</small></span>
+				</button>
+				<button class="dashboard-tab" id="tab-device" type="button" role="tab"
+					aria-selected="false" aria-controls="page-device" data-dashboard-target="device">
+					<span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8m-4-4v4" /></svg></span>
+					<span><strong>Target device</strong><small>Check compatibility</small></span>
+				</button>
+				<button class="dashboard-tab" id="tab-results" type="button" role="tab"
+					aria-selected="false" aria-controls="page-results" data-dashboard-target="results">
+					<span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V12m5 8V5m5 15v-6m5 6V9" /><path d="M2 20h20" /></svg></span>
+					<span><strong>Results</strong><small>Review your run</small></span>
+					<span class="results-indicator" id="resultsIndicator" aria-hidden="true"></span>
+				</button>
+			</nav>
+
+			<div class="dashboard-content">
+				<form id="quantizeForm" class="dashboard-form">
+					<div class="dashboard-pages" id="dashboardPages">
+						<section class="dashboard-page panel is-active" id="page-source"
+							data-dashboard-page="source" role="tabpanel" aria-labelledby="tab-source">
+							<div class="page-heading"><span class="page-icon">01</span><div><p class="eyebrow">STEP ONE</p><h3>Choose your model</h3></div></div>
+							<p class="page-description">Upload a model from your computer or fetch one directly from Hugging Face.</p>
+							<label for="modelSource">Model source
+								<select id="modelSource" name="model_source">
+									<option value="upload">Upload from this computer</option>
+									<option value="huggingface">Hugging Face repository</option>
+								</select>
+							</label>
+							<div id="uploadModelSource">
+								<label class="dropzone" for="modelFile" id="modelDropzone" data-drop-target="model">
+									<input id="modelFile" name="model" type="file" accept=".bin,.pt,.pth,.safetensors,.json,.zip,.onnx">
+									<span class="drop-icon" aria-hidden="true">↑</span>
+									<strong id="fileLabel">Drop a model or ZIP bundle here</strong>
+									<small>Use a ZIP bundle to include model config and tokenizer files</small>
+								</label>
+							</div>
+							<div id="huggingFaceModelSource" hidden>
+								<label for="hfModelId">Hugging Face model ID</label>
+								<input class="text-input" id="hfModelId" name="model_id" type="text"
+									placeholder="organization/model-name" autocomplete="off">
+								<label for="hfRevision">Revision <span class="optional-label">(Optional)</span></label>
+								<input class="text-input" id="hfRevision" name="revision" type="text"
+									placeholder="main" autocomplete="off">
+								<p class="source-help">Downloads supported weights and model assets to this server. Private or gated models require HF_TOKEN.</p>
+							</div>
+						</section>
+
+						<section class="dashboard-page panel" id="page-settings"
+							data-dashboard-page="settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+							<div class="page-heading"><span class="page-icon">02</span><div><p class="eyebrow">STEP TWO</p><h3>Configure quantization</h3></div></div>
+							<p class="page-description">Select a precision profile and optional dataset for evaluation.</p>
+							<div class="settings-grid">
+								<label>Precision
+									<select id="quantization" name="quantization">
+										<option value="int8">INT8 - balanced</option>
+										<option value="int4">INT4 - compact</option>
+										<option value="float16">FP16 - quality first</option>
+									</select>
+								</label>
+								<label>Device map
+									<select id="deviceMap" name="device_map">
+										<option value="auto">Auto detect</option>
+										<option value="cpu">CPU</option>
+										<option value="cuda">CUDA</option>
+									</select>
+								</label>
+							</div>
+							<div class="dataset-section">
+								<div><p class="eyebrow">OPTIONAL</p><h4>Evaluation dataset</h4><p>Use the built-in SST-2 benchmark or provide your own data.</p></div>
+								<label class="dropzone dataset-dropzone" for="datasetFile" id="datasetDropzone" data-drop-target="dataset">
+									<input id="datasetFile" name="dataset" type="file" accept=".json,.csv,.txt,.jsonl">
+									<span class="drop-icon" aria-hidden="true">+</span>
+									<strong id="datasetLabel">Built-in SST-2 Benchmark</strong>
+									<small id="datasetHelp">Click or drop a .json, .csv, or .txt dataset</small>
+								</label>
+							</div>
+						</section>
+					</div>
+					<div class="dashboard-action">
+						<span>Ready when you are</span>
+						<button class="primary" id="quantizeButton" type="submit">
+							<span class="button-label">Start quantization</span>
+							<span class="button-arrow" aria-hidden="true">→</span>
+						</button>
+					</div>
+				</form>
+
+				<section class="dashboard-page panel results-page" id="page-results"
+					data-dashboard-page="results" role="tabpanel" aria-labelledby="tab-results" hidden>
+					<div class="page-heading"><span class="page-icon">04</span><div><p class="eyebrow">RUN SUMMARY</p><h3>Your results</h3></div></div>
+					<aside class="output-panel">
+						<div id="output" class="output empty" role="status" aria-live="polite">
+							<div class="output-mark">--</div>
+							<h3>Nothing running</h3>
+							<p>Your quantization summary will appear here.</p>
+						</div>
+						<div class="facts">
+							<div><span>DEVICE</span><strong id="deviceValue">Pending</strong></div>
+							<div><span>MEMORY</span><strong id="memoryValue">Pending</strong></div>
+						</div>
+					</aside>
+					<section id="comparison" class="comparison" hidden>
+						<div class="panel-heading"><span>METRICS</span><h3>Before vs after</h3></div>
+						<p class="comparison-note">Measured from this quantization run comparing original and quantized model.</p>
+						<div class="comparison-grid">
+							<div class="comparison-label">Metric</div><div class="comparison-label">Before</div><div class="comparison-label">After</div><div class="comparison-label">Change</div>
+							<div>Model size</div><strong id="sizeBefore">-</strong><strong id="sizeAfter">-</strong><strong id="sizeReduction">-</strong>
+							<div>Performance</div><strong id="performanceBefore">-</strong><strong id="performanceAfter">-</strong><strong id="performanceChange">-</strong>
+							<div>Accuracy</div><strong id="accuracyBefore">-</strong><strong id="accuracyAfter">-</strong><strong id="accuracyChange">-</strong>
+						</div>
+						<p id="accuracyReason" class="comparison-note"></p>
+					</section>
+				</section>
+			</div>
+		</section>
+	</main>
+	<script src="/static/js/utils.js"></script>
+	<script src="/static/js/api.js"></script>
+	<script src="/static/js/main.js"></script>
+</body>
+
+</html>

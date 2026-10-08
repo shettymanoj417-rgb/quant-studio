@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - MAX_CONTENT_LENGTH=524288000
+    volumes:
+      - ./uploads:/app/uploads
+      - ./quantized_models:/app/quantized_models
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - quantizer-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - web
+    networks:
+      - quantizer-network
+
+networks:
+  quantizer-network:
+    driver: bridge

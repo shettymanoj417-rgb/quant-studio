@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+venv/
+venv311/
+.venv*/
+
+# Environment
+.env
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Generated/runtime files
+backend/uploads/
+backend/logs/
+backend/quantized_models/
+backend/accuracy_model/
+
+# Large model files
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+quantized_models/
+uploads/
